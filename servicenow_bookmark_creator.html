@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceNow Extractor Bookmark Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .bookmark {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .bookmark-link {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .instructions {
+            background-color: #fffbd6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>ServiceNow Asset Data Extractor</h1>
+    
+    <div class="instructions">
+        <h2>Create a Bookmark (One-time Setup)</h2>
+        <p>Follow these steps to create a bookmark that will extract data from ServiceNow:</p>
+        
+        <div class="step">
+            <h3>Step 1: Create a new bookmark</h3>
+            <p>Right-click on your browser's bookmark bar and select "Add new bookmark" or "Add page..." (or press Ctrl+D)</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Enter bookmark details</h3>
+            <p>In the bookmark dialog:</p>
+            <ul>
+                <li>Name: <strong>Extract ServiceNow Data</strong></li>
+                <li>URL/Location: <em>Copy the code below</em></li>
+            </ul>
+        </div>
+        
+        <div class="bookmark">
+            <h3>Copy this entire text as the bookmark URL:</h3>
+            <textarea id="bookmarklet-code" rows="3" style="width: 100%; font-family: monospace;">javascript:(function(){try{var mainFrame=document.getElementById('gsft_main')||document.querySelector('iframe[name="gsft_main"]')||document.querySelector('frame[name="gsft_main"]');var frameDoc;if(mainFrame){frameDoc=mainFrame.contentDocument||mainFrame.contentWindow.document;}else{frameDoc=document;}if(!frameDoc){alert('Could not find document. Current page structure: '+document.body.innerHTML.slice(0,500));return;}var data={cmdb_url:window.location.href};var fields=['asset_tag','serial_number','name','host_name','operational_status','install_status','location','u_ci_region','owned_by','assigned_to','manufacturer','model_id','u_model_description','vendor','warranty_expiration','os','os_version','comments'];function findElement(field){var idSelectors=['u_cmdb_ci_notebook.'+field,'sys_original.'+field,'u_cmdb_ci_notebook_'+field,'sys_display.u_cmdb_ci_notebook.'+field];var cssSelectors=['[name="'+field+'"]','[id$="'+field+'"]','[id*="'+field+'"]'];for(var i=0;i<idSelectors.length;i++){var elem=frameDoc.getElementById(idSelectors[i]);if(elem)return elem;}for(var i=0;i<cssSelectors.length;i++){var elems=frameDoc.querySelectorAll(cssSelectors[i]);if(elems.length)return elems[0];}return null;}function getSelectDisplayValue(fieldId){var elem=frameDoc.getElementById(fieldId);if(elem&&elem.tagName==='SELECT'){for(var i=0;i<elem.options.length;i++){if(elem.options[i].value===elem.value){return elem.options[i].text;}}}return null;}function getReferenceDisplayValue(fieldId,fieldName){var displaySpanId='sys_display.'+fieldId;var displaySpan=frameDoc.getElementById(displaySpanId);if(displaySpan){return displaySpan.value||displaySpan.textContent.trim();}var altDisplaySpan=frameDoc.querySelector('input[id$="_'+fieldName+'_display"]');if(altDisplaySpan){return altDisplaySpan.value;}var referenceField=frameDoc.getElementById(fieldId);if(referenceField){var container=referenceField.closest('.container-fluid')||referenceField.closest('td')||referenceField.parentNode;if(container){var displaySpans=container.querySelectorAll('input[type="text"][id*="display"], span[id*="display"]');if(displaySpans.length>0){return displaySpans[0].value||displaySpans[0].textContent.trim();}}}return null;}var data_copy={};for(var i=0;i<fields.length;i++){var fieldId='u_cmdb_ci_notebook.'+fields[i];var elem=frameDoc.getElementById(fieldId);if(elem){var fieldName=fields[i]==='host_name'?%27hostname%27:fields[i]===%27u_model_description%27?%27model_description%27:fields[i]===%27u_ci_region%27?%27ci_region%27:fields[i];if([%27operational_status%27,%27install_status%27].includes(fieldName)){var displayValue=getSelectDisplayValue(fieldId);data_copy[fieldName]=displayValue||elem.value;}else{data_copy[fieldName]=elem.value||elem.textContent||%27%27;}}}for(var i=0;i<fields.length;i++){var fieldId=%27u_cmdb_ci_notebook.%27+fields[i];var fieldName=fields[i]===%27host_name%27?%27hostname%27:fields[i]===%27u_model_description%27?%27model_description%27:fields[i]===%27u_ci_region%27?%27ci_region%27:fields[i];if([%27owned_by%27,%27assigned_to%27,%27location%27,%27manufacturer%27,%27model_id%27,%27vendor%27].includes(fieldName)){var displayValue=getReferenceDisplayValue(fieldId,fields[i]);if(displayValue)data_copy[fieldName]=displayValue;}}delete data_copy.hostname;data=Object.assign(data,data_copy);var resultDiv=document.createElement(%27div%27);resultDiv.style=%27position:fixed;top:10px;left:10px;width:80%;height:80%;z-index:99999;background-color:white;padding:20px;border:2px solid blue;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,0.5);overflow:auto;font-family:Arial,sans-serif;%27;var header=document.createElement(%27div%27);header.innerHTML=%27<h2>Asset Data Extracted</h2><p>Copy this data to use in the IT Bench Inventory app.</p>%27;resultDiv.appendChild(header);var resultArea=document.createElement(%27textarea%27);resultArea.value=JSON.stringify(data,null,2);resultArea.style=%27width:100%;height:70%;margin:10px 0;font-family:monospace;border:1px solid #ccc;padding:10px;';resultArea.onclick=function(){this.select();};resultDiv.appendChild(resultArea);var buttonContainer=document.createElement('div');buttonContainer.style='margin-top:10px;';var copyButton=document.createElement('button');copyButton.textContent='Copy to Clipboard';copyButton.style='margin-right:10px;padding:8px;background-color:#4CAF50;color:white;border:none;cursor:pointer;';copyButton.onclick=function(){resultArea.select();document.execCommand('copy');alert('Data copied to clipboard!');};buttonContainer.appendChild(copyButton);var closeButton=document.createElement('button');closeButton.textContent='Close';closeButton.style='padding:8px;background-color:#f44336;color:white;border:none;cursor:pointer;';closeButton.onclick=function(){document.body.removeChild(resultDiv);};buttonContainer.appendChild(closeButton);resultDiv.appendChild(buttonContainer);document.body.appendChild(resultDiv);resultArea.select();}catch(e){alert('Error extracting data: '+e.message+'
+
+Line: '+e.lineNumber);}})();</textarea>
+            <button onclick="copyBookmarklet()">Copy Bookmark Code</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Save the bookmark</h3>
+            <p>Click "Save" or "Done" to create the bookmark</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Test the bookmark</h3>
+            <p>After saving the bookmark, go to this asset page: <a href="https://globalfoundries.service-now.com/u_cmdb_ci_notebook.do?sysparm_query=asset_tag%3DGF-1300023046" target="_blank">https://globalfoundries.service-now.com/u_cmdb_ci_notebook.do?sysparm_query=asset_tag%3DGF-1300023046</a></p>
+            <p>Once the ServiceNow page loads, click your new "Extract ServiceNow Data" bookmark</p>
+            <p>It should show a popup with the asset data that you can copy</p>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h2>Using the Bookmark</h2>
+        <ol>
+            <li>Navigate to a ServiceNow asset page</li>
+            <li>Click the "Extract ServiceNow Data" bookmark</li>
+            <li>Click "Copy to Clipboard" in the popup</li>
+            <li>Return to the IT Bench Inventory application and paste the data</li>
+        </ol>
+    </div>
+    
+    <script>
+        function copyBookmarklet() {
+            var codeTextarea = document.getElementById('bookmarklet-code');
+            codeTextarea.select();
+            document.execCommand('copy');
+            alert('Bookmark code copied! Now create a new bookmark and paste this as the URL.');
+        }
+    </script>
+</body>
+</html>

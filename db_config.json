@@ -1,0 +1,10 @@
+{
+    "primary": {
+      "dbname": "inventory",
+      "user": "inventory_user",
+      "password": "Globalfoundries2025!",
+      "host": "10.34.49.111",
+      "port": "5432"
+    },
+    "replicas": []
+  }
